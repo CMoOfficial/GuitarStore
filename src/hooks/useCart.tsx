@@ -8,6 +8,7 @@ interface CartContextType {
   items: CartItemModel[];
   addToCart: (guitar: GuitarModel) => void;
   removeFromCart: (guitarId: number) => void;
+  updateQuantity: (guitarId: number, quantity: number) => void;
   totalItems: number;
   totalPrice: number;
   isCartOpen: boolean;
@@ -43,11 +44,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems((prevItems) => prevItems.filter((item) => item.guitar.id !== guitarId));
   };
 
+  const updateQuantity = (guitarId: number, quantity: number) => {
+    if (quantity <= 0) {
+      removeFromCart(guitarId);
+      return;
+    }
+    setItems((prevItems) => 
+      prevItems.map((item) => 
+        item.guitar.id === guitarId ? { ...item, quantity } : item
+      )
+    );
+  };
+
   const totalItems = items.reduce((acc, item) => acc + item.quantity, 0);
   const totalPrice = items.reduce((acc, item) => acc + item.guitar.price * item.quantity, 0);
 
   return (
-    <CartContext.Provider value={{ items, addToCart, removeFromCart, totalItems, totalPrice, isCartOpen, openCart, closeCart }}>
+    <CartContext.Provider value={{ items, addToCart, removeFromCart, updateQuantity, totalItems, totalPrice, isCartOpen, openCart, closeCart }}>
       {children}
     </CartContext.Provider>
   );
